@@ -63,10 +63,16 @@ const login = async (req, res) => {
     });
     res.status(200).json({
       message: "login successful",
+      data: {
+        username: user.username,
+        email: user.email,
+        department: user.department,
+      },
     });
   } catch (error) {
     res.status(500).json({
       message: "Server error, could not login",
+
     });
   }
 };
