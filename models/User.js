@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
     },
+    department: String,
   },
   {
     timestamps: true,

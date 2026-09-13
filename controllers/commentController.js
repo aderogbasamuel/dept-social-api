@@ -2,9 +2,9 @@ const Comment = require("../models/Comment");
 
 const createComment = async (req, res) => {
   try {
-    const { content } = req.body;
+    const {postId, content,  } = req.body;
     const { id } = req.params;
-
+console.log("Received body:", req.body);
     if (!content || !content.trim()) {
       return res.status(400).json({
         message: "Comment cannot be empty",
@@ -14,7 +14,7 @@ const createComment = async (req, res) => {
     const comment = await Comment.create({
       content: content.trim(),
       author: req.user,
-      post: id,
+      post: postId,
     });
 
     const populatedComment = await comment.populate(

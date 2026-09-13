@@ -9,12 +9,12 @@ const {
   deletePost,
   updatePost,
   likePost,
-} = require("../controllers/postController");
-router.post("/",protect, createPost);
+} = require("../controllers/postControllers");
+router.post("/", protect, createPost);
 router.get("/", getPosts);
 router.get("/:id", getPostById );
-router.post("/:id",protect, deletePost);
+router.delete("/:id",protect, deletePost);
 router.patch("/:id",protect, updatePost);
-router.patch("/:id",protect, likePost);
+router.post("/:id/like",protect, likePost);
 
 module.exports = router;
