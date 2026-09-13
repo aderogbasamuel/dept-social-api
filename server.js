@@ -18,7 +18,7 @@ mongoose
 
 app.use(
   cors({
-    origin: "http://localhost:5173" || 'https://sees30unilag.vercel.app',
+    origin: ["http://localhost:5173", "https://sees30unilag.vercel.app"],
     credentials: true,
   })
 );
