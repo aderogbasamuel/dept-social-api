@@ -18,8 +18,8 @@ mongoose
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // your frontend's URL — Vite's default port
-    credentials: true, // required so the browser sends/receives cookies
+    origin: "http://localhost:5173" || 'https://sees30unilag.vercel.app',
+    credentials: true,
   })
 );
 app.use(express.json());
