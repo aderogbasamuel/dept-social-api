@@ -6,9 +6,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    avatar: {
+    avatarUrl: {
       type: String,
-      default: `https://ui-avatars.com/api/?name=User&background=random`,
+      // default: "",
     },
     email: {
       type: String,

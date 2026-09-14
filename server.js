@@ -9,7 +9,7 @@ const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/post");
 const commentRoutes = require("./routes/comment");
 const statusRoutes= require("./routes/status")
-
+const userRoutes = require("./routes/user");
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -28,6 +28,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/statuses", statusRoutes);
+app.use("/api/users", userRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("api ruuning");
