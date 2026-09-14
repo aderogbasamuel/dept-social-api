@@ -1,8 +1,8 @@
 const Post = require("../models/Post");
 const createPost = async (req, res) => {
   try {
-    const { text } = req.body;
-console.log("Received body:", req.body);
+    const { text, image } = req.body;
+    console.log("Received body:", req.body);
     if (!text || !text.trim()) {
       return res.status(400).json({
         message: "Post cannot be empty",
@@ -11,14 +11,12 @@ console.log("Received body:", req.body);
 
     const post = await Post.create({
       text: text.trim(),
+      image: image,
       author: req.user,
     });
 
-    const populatedPost = await post.populate(
-      "author",
-      "username"
-    );
-    res.status(201).json({populatedPost})
+    const populatedPost = await post.populate("author", "username");
+    res.status(201).json({ populatedPost });
   } catch (err) {
     console.error("post ERROR:", err);
 
@@ -29,12 +27,14 @@ console.log("Received body:", req.body);
 };
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("author", "username").sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .populate("author", "username")
+      .sort({ createdAt: -1 });
     if (!posts)
       return res.status(401).json({
         message: "No post found",
       });
-      
+
     res.status(200).json({
       posts,
     });
@@ -125,7 +125,9 @@ const likePost = async (req, res) => {
       post.likes.push(req.user);
     }
     await post.save();
-    res.status(200).json({ liked: !alreadyLiked, likesCount: post.likes.length });
+    res
+      .status(200)
+      .json({ liked: !alreadyLiked, likesCount: post.likes.length });
   } catch (error) {
     res.status(500).json({
       message: "Server Error",

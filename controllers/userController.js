@@ -6,9 +6,12 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET);
 };
 
+
+
+
 const register = async (req, res) => {
   try {
-    const { username, email, password, department } = req.body;
+    const { username, email, password, department, birthday } = req.body;
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -24,6 +27,8 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       department,
+      birthday,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`, 
     });
     res.status(201).json({
       message: "User Created Succesfully",

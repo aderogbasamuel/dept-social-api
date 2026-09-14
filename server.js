@@ -8,6 +8,7 @@ app.use(cookieParser());
 const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/post");
 const commentRoutes = require("./routes/comment");
+const statusRoutes= require("./routes/status")
 
 mongoose
   .connect(process.env.MONGODB_URI)
@@ -26,6 +27,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/statuses", statusRoutes);
+
 app.get("/", (req, res) => {
   res.send("api ruuning");
 });

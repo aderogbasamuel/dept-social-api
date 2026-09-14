@@ -6,6 +6,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    avatar: {
+      type: String,
+      default: `https://ui-avatars.com/api/?name=User&background=random`,
+    },
     email: {
       type: String,
       required: true,
@@ -15,10 +19,14 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     department: String,
+    birthday: {
+      type: Date,
+    }
   },
   {
     timestamps: true,
   },
+
 );
 
 module.exports = mongoose.model("User", userSchema);
