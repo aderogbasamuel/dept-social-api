@@ -21,7 +21,9 @@ const userSchema = new mongoose.Schema(
     department: String,
     birthday: {
       type: Date,
-    }
+    },
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,

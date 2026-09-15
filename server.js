@@ -10,6 +10,7 @@ const postRoutes = require("./routes/post");
 const commentRoutes = require("./routes/comment");
 const statusRoutes= require("./routes/status")
 const userRoutes = require("./routes/user");
+const profileRoutes = require("./routes/profile");
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -29,6 +30,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/statuses", statusRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/profile", profileRoutes);
 
 
 app.get("/", (req, res) => {

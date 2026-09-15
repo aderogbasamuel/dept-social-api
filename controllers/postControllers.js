@@ -72,7 +72,7 @@ const createPost = async (req, res) => {
 const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("author", "username")
+      .populate("author", "username avatarUrl")
       .sort({ createdAt: -1 });
     if (!posts)
       return res.status(401).json({
