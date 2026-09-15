@@ -23,7 +23,7 @@ Backend for a department-scoped social feed app (posts, statuses, comments, like
 ## Getting started
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/aderogbasamuel/dept-social-api/
 cd dept-social-api
 npm install
 cp .env.example .env   # fill in real values, see below
