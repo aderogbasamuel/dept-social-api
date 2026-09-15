@@ -1,6 +1,7 @@
 const express = require("express");
 const protect = require("../middleware/authMiddleware");
 const router = express.Router();
+const upload = require("../middleware/upload");
 
 const {
   createPost,
@@ -10,7 +11,7 @@ const {
   updatePost,
   likePost,
 } = require("../controllers/postControllers");
-router.post("/", protect, createPost);
+router.post("/", protect, upload.single("image"), createPost);
 router.get("/", getPosts);
 router.get("/:id", getPostById );
 router.delete("/:id",protect, deletePost);

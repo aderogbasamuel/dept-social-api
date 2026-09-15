@@ -1,30 +1,74 @@
 const Post = require("../models/Post");
+const cloudinary = require("../config/Cloudinary");
+const streamifier = require("streamifier");
+
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "dept-social/posts" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
 const createPost = async (req, res) => {
   try {
-    const { text, image } = req.body;
-    console.log("Received body:", req.body);
+    const { text } = req.body;
+
     if (!text || !text.trim()) {
-      return res.status(400).json({
-        message: "Post cannot be empty",
-      });
+      return res.status(400).json({ message: "Post cannot be empty" });
+    }
+
+    let imageUrl = "";
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      imageUrl = result.secure_url;
     }
 
     const post = await Post.create({
       text: text.trim(),
-      image: image,
+      image: imageUrl,
       author: req.user,
     });
 
-    const populatedPost = await post.populate("author", "username");
-    res.status(201).json({ populatedPost });
+    const populated = await post.populate("author", "username avatarUrl");
+    res.status(201).json(populated);
   } catch (err) {
     console.error("post ERROR:", err);
-
-    res.status(500).json({
-      message: err.message,
-    });
+    res.status(500).json({ message: err.message });
   }
 };
+
+// const createPost = async (req, res) => {
+//   try {
+//     const { text, image } = req.body;
+//     console.log("Received body:", req.body);
+//     if (!text || !text.trim()) {
+//       return res.status(400).json({
+//         message: "Post cannot be empty",
+//       });
+//     }
+
+//     const post = await Post.create({
+//       text: text.trim(),
+//       image: image,
+//       author: req.user,
+//     });
+
+//     const populatedPost = await post.populate("author", "username");
+//     res.status(201).json({ populatedPost });
+//   } catch (err) {
+//     console.error("post ERROR:", err);
+
+//     res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// };
 const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
