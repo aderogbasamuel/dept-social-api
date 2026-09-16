@@ -32,7 +32,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/statuses", statusRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/users", profileRoutes);
-app.use("/api/users", groupRoutes);
+app.use("/api/groups", groupRoutes);
 
 app.get("/", (req, res) => {
   res.send("api ruuning");
