@@ -7,7 +7,7 @@ const membershipSchema= new mongoose.Schema({
         required: true,
     },
     user: {
-        type: moongose.Schema.TypesObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },

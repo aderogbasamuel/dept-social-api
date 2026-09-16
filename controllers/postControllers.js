@@ -1,4 +1,6 @@
 const Post = require("../models/Post");
+const Group = require("../models/Group");
+const Membership = require("../models/Membership");
 const cloudinary = require("../config/Cloudinary");
 const streamifier = require("streamifier");
 
@@ -17,26 +19,48 @@ const uploadToCloudinary = (buffer) => {
 
 const createPost = async (req, res) => {
   try {
-    const { text } = req.body;
-
+    const { text, group } = req.body;
+ 
     if (!text || !text.trim()) {
       return res.status(400).json({ message: "Post cannot be empty" });
     }
-
+ 
+    if (group) {
+      const membership = await Membership.findOne({
+        group,
+        user: req.user,
+      });
+      if (!membership) {
+        return res
+          .status(403)
+          .json({ message: "You must join this group to post in it" });
+      }
+    }
+ 
     let imageUrl = "";
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       imageUrl = result.secure_url;
     }
-
+ 
     const post = await Post.create({
       text: text.trim(),
       image: imageUrl,
       author: req.user,
+      group: group || null,
     });
-
-    const populated = await post.populate("author", "username avatarUrl");
+ 
+    if (group) {
+      await Group.findByIdAndUpdate(group, { $inc: { postCount: 1 } });
+    }
+ 
+    const populated = await post.populate([
+      { path: "author", select: "username avatarUrl" },
+      { path: "group", select: "name avatar" },
+    ]);
+ 
     res.status(201).json(populated);
+
   } catch (err) {
     console.error("post ERROR:", err);
     res.status(500).json({ message: err.message });
@@ -71,16 +95,47 @@ const createPost = async (req, res) => {
 // };
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
+   const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+ 
+    let filter;
+ 
+    if (req.query.group) {
+      // Single group's feed
+      filter = { group: req.query.group };
+    } else if (req.query.scope === "main") {
+      // Ungrouped only
+      filter = { group: null };
+    } else {
+      // Mixed home feed — this is the default
+      const memberships = await Membership.find({ user: req.user }).select(
+        "group"
+      );
+      const myGroupIds = memberships.map((m) => m.group);
+ 
+      filter = {
+        $or: [
+          { group: null },              // everyone's main-feed posts
+          { group: { $in: myGroupIds } }, // posts from groups you're in
+        ],
+      };
+    }
+ 
+    const posts = await Post.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("author", "username avatarUrl")
-      .sort({ createdAt: -1 });
-    if (!posts)
-      return res.status(401).json({
-        message: "No post found",
-      });
-
+      .populate("group", "name avatar"); // so the UI can show "posted in X"
+ 
+    const total = await Post.countDocuments(filter);
+ 
     res.status(200).json({
       posts,
+      page,
+      limit,
+      hasMore: skip + posts.length < total,
     });
   } catch (error) {
     console.log(error);

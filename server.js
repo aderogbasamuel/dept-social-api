@@ -11,6 +11,7 @@ const commentRoutes = require("./routes/comment");
 const statusRoutes= require("./routes/status")
 const userRoutes = require("./routes/user");
 const profileRoutes = require("./routes/profile");
+const groupRoutes = require("./routes/group")
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -31,7 +32,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/statuses", statusRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/users", profileRoutes);
-
+app.use("/api/users", groupRoutes);
 
 app.get("/", (req, res) => {
   res.send("api ruuning");

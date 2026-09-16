@@ -1,4 +1,4 @@
-const mongoose =  require("mogoose");
+const mongoose =  require("mongoose");
 
 const GroupSchema= new mongoose.Schema({
     name: {
