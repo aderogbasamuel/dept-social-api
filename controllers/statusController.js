@@ -23,7 +23,7 @@ const getStatuses = async (req, res) => {
   try {
     const statuses = await Status.find()
       .sort({ createdAt: -1 })
-      .populate("author", "username");
+      .populate("author", "username avatarUrl");
     res.status(200).json(statuses);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -33,7 +33,7 @@ const getStatusById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const status = await Status.findById(id);
+    const status = await Status.findById(id).populate("author", "username avatarUrl");
 
     if (!status) {
       return res.status(404).json({
