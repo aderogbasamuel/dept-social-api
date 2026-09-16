@@ -26,7 +26,8 @@ const getUserProfile = async (req, res) => {
       isOwnProfile: id === req.user.toString(),
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error fetching profile" });
+    console.log(error);
+    res.status(500).json({ message: "Server error fetching profile", error: error, });
   }
 };
 
