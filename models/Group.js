@@ -22,8 +22,8 @@ const GroupSchema= new mongoose.Schema({
     },
     privacy: {
         type: String,
-        enum: ["Public", "Private"],
-        default: "Public"
+        enum: ["public", "private"],
+        default: "public"
     },
     memberCount:{
         type: Number,
