@@ -11,7 +11,7 @@ const uploadToCloudinary = (buffer) => {
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
-      }
+      },
     );
     streamifier.createReadStream(buffer).pipe(stream);
   });
@@ -20,11 +20,11 @@ const uploadToCloudinary = (buffer) => {
 const createPost = async (req, res) => {
   try {
     const { text, group } = req.body;
- 
+
     if (!text || !text.trim()) {
       return res.status(400).json({ message: "Post cannot be empty" });
     }
- 
+
     if (group) {
       const membership = await Membership.findOne({
         group,
@@ -36,31 +36,30 @@ const createPost = async (req, res) => {
           .json({ message: "You must join this group to post in it" });
       }
     }
- 
+
     let imageUrl = "";
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       imageUrl = result.secure_url;
     }
- 
+
     const post = await Post.create({
       text: text.trim(),
       image: imageUrl,
       author: req.user,
       group: group || null,
     });
- 
+
     if (group) {
       await Group.findByIdAndUpdate(group, { $inc: { postCount: 1 } });
     }
- 
+
     const populated = await post.populate([
       { path: "author", select: "username avatarUrl" },
       { path: "group", select: "name avatar" },
     ]);
- 
-    res.status(201).json(populated);
 
+    res.status(201).json(populated);
   } catch (err) {
     console.error("post ERROR:", err);
     res.status(500).json({ message: err.message });
@@ -95,12 +94,12 @@ const createPost = async (req, res) => {
 // };
 const getPosts = async (req, res) => {
   try {
-   const page = parseInt(req.query.page) || 1;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
- 
+
     let filter;
- 
+
     if (req.query.group) {
       // Single group's feed
       filter = { group: req.query.group };
@@ -110,29 +109,32 @@ const getPosts = async (req, res) => {
     } else {
       // Mixed home feed — this is the default
       const memberships = await Membership.find({ user: req.user }).select(
-        "group"
+        "group",
       );
       const myGroupIds = memberships.map((m) => m.group);
- 
+
       filter = {
         $or: [
-          { group: null },              // everyone's main-feed posts
+          { group: null }, // everyone's main-feed posts
           { group: { $in: myGroupIds } }, // posts from groups you're in
         ],
       };
     }
- 
+
     const posts = await Post.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("author", "username avatarUrl")
       .populate("group", "name avatar"); // so the UI can show "posted in X"
- 
+
     const total = await Post.countDocuments(filter);
- 
+    const postsWithLikeStatus = posts.map((post) => ({
+      ...post.toObject(),
+      likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+    }));
     res.status(200).json({
-      posts,
+      posts: postsWithLikeStatus,
       page,
       limit,
       hasMore: skip + posts.length < total,
@@ -152,8 +154,12 @@ const getPostById = async (req, res) => {
       return res.status(404).json({
         message: "Post not found",
       });
+      const postsWithLikeStatus = posts.map((post) => ({
+  ...post.toObject(),
+  likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+}));
     res.status(200).json({
-      post,
+      post: postsWithLikeStatus,
     });
   } catch (error) {
     res.status(500).json({
@@ -164,8 +170,14 @@ const getPostById = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findByIdAndDelete(id);
+    const post = await Post.findById(id);
     if (!post) return res.status(401).json({ message: "Erro" });
+    if (req.user.toString() != post.author.toString()) {
+      return res.status(401).json({
+        message: "Not authorized, can't delete this post",
+      });
+    }
+    await post.deleteOne();
     res.status(200).json({
       message: "Post Deleted",
     });
@@ -178,10 +190,14 @@ const deletePost = async (req, res) => {
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
     const { text } = req.body;
+    const post = await Post.findById(id);
     if (!post) return res.status(404).json({ messsage: "Post not found" });
-
+    if (req.user.toString() != post.author.toString()) {
+      return res.status(401).json({
+        message: "Not authorized, can't Update this post",
+      });
+    }
     const editTimeLimit = 15 * 60 * 1000;
     const currentTime = new Date().getTime();
     const postCreationTime = new Dat(post.createdAt).getTime();

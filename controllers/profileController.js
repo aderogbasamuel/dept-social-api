@@ -78,7 +78,11 @@ const getPostsByUser = async (req, res) => {
     const posts = await Post.find({ author: id })
       .sort({ createdAt: -1 })
       .populate("author", "username avatarUrl");
-    res.status(200).json(posts);
+      const postsWithLikeStatus = posts.map((post) => ({
+  ...post.toObject(),
+  likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+}));
+    res.status(200).json({posts: postsWithLikeStatus});
   } catch (error) {
     res.status(500).json({ message: "Server error fetching user's posts" });
   }
