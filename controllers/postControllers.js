@@ -127,11 +127,12 @@ const getPosts = async (req, res) => {
       .limit(limit)
       .populate("author", "username avatarUrl")
       .populate("group", "name avatar"); // so the UI can show "posted in X"
-
+    
     const total = await Post.countDocuments(filter);
     const postsWithLikeStatus = posts.map((post) => ({
       ...post.toObject(),
       likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+
     }));
     res.status(200).json({
       posts: postsWithLikeStatus,
@@ -154,10 +155,10 @@ const getPostById = async (req, res) => {
       return res.status(404).json({
         message: "Post not found",
       });
-      const postsWithLikeStatus = posts.map((post) => ({
-  ...post.toObject(),
-  likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
-}));
+    const postsWithLikeStatus = posts.map((post) => ({
+      ...post.toObject(),
+      likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+    }));
     res.status(200).json({
       post: postsWithLikeStatus,
     });

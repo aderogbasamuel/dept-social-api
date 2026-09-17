@@ -2,9 +2,9 @@ const Comment = require("../models/Comment");
 
 const createComment = async (req, res) => {
   try {
-    const {postId, content,  } = req.body;
+    const { postId, content } = req.body;
     const { id } = req.params;
-console.log("Received body:", req.body);
+    console.log("Received body:", req.body);
     if (!content || !content.trim()) {
       return res.status(400).json({
         message: "Comment cannot be empty",
@@ -17,10 +17,7 @@ console.log("Received body:", req.body);
       post: postId,
     });
 
-    const populatedComment = await comment.populate(
-      "author",
-      "username"
-    );
+    const populatedComment = await comment.populate("author", "username");
 
     res.status(201).json(populatedComment);
   } catch (err) {
@@ -37,7 +34,7 @@ const getComments = async (req, res) => {
     const { id } = req.params;
 
     const comments = await Comment.find({ post: id })
-      .populate("author", "username")
+      .populate("author", "username avatarUrl")
       .sort({ createdAt: -1 });
 
     res.status(200).json(comments);
