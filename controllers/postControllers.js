@@ -127,12 +127,11 @@ const getPosts = async (req, res) => {
       .limit(limit)
       .populate("author", "username avatarUrl")
       .populate("group", "name avatar"); // so the UI can show "posted in X"
-    
+
     const total = await Post.countDocuments(filter);
     const postsWithLikeStatus = posts.map((post) => ({
       ...post.toObject(),
       likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
-
     }));
     res.status(200).json({
       posts: postsWithLikeStatus,
@@ -150,19 +149,26 @@ const getPosts = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
-    const post = await Post.findById(id);
-    if (!post)
+    const post = await Post.findById(id)
+      .populate("author", "username avatarUrl")
+      .populate("group", "name avatar");
+    if (!post) {
       return res.status(404).json({
         message: "Post not found",
       });
-    const postsWithLikeStatus = posts.map((post) => ({
-      ...post.toObject(),
-      likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
-    }));
+    }
+    const postsWithLikeStatus = 
+      {
+        ...post.toObject(),
+        likedByMe: post.likes.some(
+          (id) => id.toString() === req.user.toString(),
+        ),
+      };
     res.status(200).json({
       post: postsWithLikeStatus,
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message: "Server error",
     });

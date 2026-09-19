@@ -14,7 +14,7 @@ const getUserProfile = async (req, res) => {
     const postsCount = await Post.countDocuments({ author: id });
 
     const isFollowing = user.followers.some(
-      (followerId) => followerId.toString() === req.user.toString()
+      (followerId) => followerId.toString() === req.user.toString(),
     );
 
     res.status(200).json({
@@ -27,7 +27,9 @@ const getUserProfile = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error fetching profile", error: error, });
+    res
+      .status(500)
+      .json({ message: "Server error fetching profile", error: error });
   }
 };
 
@@ -48,7 +50,7 @@ const toggleFollow = async (req, res) => {
     }
 
     const isFollowing = currentUser.following.some(
-      (uid) => uid.toString() === id
+      (uid) => uid.toString() === id,
     );
 
     if (isFollowing) {
@@ -78,14 +80,15 @@ const getPostsByUser = async (req, res) => {
     const posts = await Post.find({ author: id })
       .sort({ createdAt: -1 })
       .populate("author", "username avatarUrl");
-      const postsWithLikeStatus = posts.map((post) => ({
-  ...post.toObject(),
-  likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
-}));
-    res.status(200).json({posts: postsWithLikeStatus});
+    const postsWithLikeStatus = posts.map((post) => ({
+      ...post.toObject(),
+      likedByMe: post.likes.some((id) => id.toString() === req.user.toString()),
+    }));
+    res.status(200).json({ posts: postsWithLikeStatus });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error fetching user's posts" });
   }
 };
 
-module.exports = { getUserProfile , toggleFollow, getPostsByUser };
+module.exports = { getUserProfile, toggleFollow, getPostsByUser };

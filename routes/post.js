@@ -20,5 +20,5 @@ router.get("/:id", protect, getPostById );
 router.delete("/:id", protect, deletePost);
 router.patch("/:id", protect, updatePost);
 router.post("/:id/like", protect, likePost);
-router.get("/user/:id/", getPostsByUser);
+router.get("/user/:id/",protect, getPostsByUser);
 module.exports = router;
